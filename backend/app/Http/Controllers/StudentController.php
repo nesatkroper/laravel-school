@@ -187,8 +187,31 @@ class StudentController extends Controller
             return response()
                 ->json([
                     'status' => false,
-                    'message' => $e->__tostring()
+                    'message' => $e
+                        ->__tostring()
                 ], 400);
+        }
+    }
+
+    public function destroyStudent(string $id)
+    {
+        try {
+            $data = Student::findOrFail($id);
+            if ($data)
+                $data
+                    ->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Student deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()
+                ->json([
+                    'status' => false,
+                    'message' => $e
+                        ->__toString()
+                ]);
         }
     }
 }

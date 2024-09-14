@@ -1,9 +1,11 @@
-<script setup lang="ts">
-import { Button } from "@/components/ui/button";
-</script>
-
 <template>
-  <div>
-    <Button>Button</Button>
+  <div class="card flex justify-center">
+    <ToggleSwitch v-model="checked" />
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+
+const checked = ref(false);
+</script>
