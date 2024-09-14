@@ -2,7 +2,12 @@
 import { ref, onMounted } from "vue";
 // import axios from "axios";
 import type { Student } from "../../types/Student";
-import { getData, deleteData, createData } from "../../services/method";
+import {
+  getData,
+  createData,
+  updateData,
+  destroyData,
+} from "../../services/student.controller";
 
 // COMPONENT
 // @ts-ignore
@@ -28,8 +33,6 @@ import { Button } from "../../components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -58,15 +61,16 @@ import {
   PopoverTrigger,
 } from "../../components/ui/popover";
 import { cn } from "../../lib/utils";
+import { resolve } from "path";
 
 const df = new DateFormatter("en-US", {
   dateStyle: "long",
 });
 
-const value = ref<DateValue>();
-
 // FIELDS
 const student: any = ref<Student[]>([]);
+const create: any = ref<Student[]>([]);
+const update: any = ref<Student[]>([]);
 const stu_load = ref(true);
 
 // METHODS
@@ -81,8 +85,25 @@ const handleGet = (uri: string, stu_id?: number) => {
   });
 };
 
+const handleCreate = (uri: string) => {
+  const promise = new Promise((resolve) =>
+    resolve(createData(uri, create.value))
+  );
+  promise.then(() => {
+    handleGet("student");
+    create.value = [];
+  });
+};
+
+const handleUpdate = (uri: string, id: number) => {
+  const promise = new Promise((resolve) =>
+    resolve(updateData(uri, update.value, id))
+  );
+  promise.then(() => handleGet("student"));
+};
+
 const handleDelete = (uri: string, stu_id: number) => {
-  const promise = new Promise((resolve) => resolve(deleteData(uri, stu_id)));
+  const promise = new Promise((resolve) => resolve(destroyData(uri, stu_id)));
   promise.then(() => handleGet("student"));
 };
 
@@ -115,120 +136,142 @@ onMounted(() => {
           </div>
         </div>
         <DialogContent class="sm:max-w-[575px]">
-          <DialogHeader>
-            <DialogTitle>Add Student</DialogTitle>
-          </DialogHeader>
-          <div class="flex gap-3">
-            <div class="grid w-full max-w-sm items-center gap-1.5">
-              <Label for="email">First Name</Label>
-              <Input id="email" type="text" placeholder="First Name" />
+          <form @submit.prevent="handleCreate('student')">
+            <DialogHeader>
+              <DialogTitle>Add Student</DialogTitle>
+            </DialogHeader>
+            <div class="flex gap-3 my-3">
+              <div class="grid w-full max-w-sm items-center gap-1.5">
+                <Label for="email">First Name</Label>
+                <Input
+                  v-model="create.fname"
+                  type="text"
+                  placeholder="First Name"
+                />
+              </div>
+              <div class="grid w-full max-w-sm items-center gap-1.5">
+                <Label for="email">Last Name</Label>
+                <Input
+                  v-model="create.lname"
+                  type="text"
+                  placeholder="Last Name"
+                />
+              </div>
             </div>
-            <div class="grid w-full max-w-sm items-center gap-1.5">
-              <Label for="email">Last Name</Label>
-              <Input id="email" type="text" placeholder="Last Name" />
+            <div class="flex gap-3 my-3">
+              <div class="grid w-full max-w-sm items-center gap-1.5">
+                <Label for="email">Gender</Label>
+                <Select v-model="create.gender">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="male"> Male </SelectItem>
+                      <SelectItem value="female"> Female </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div class="grid w-full max-w-sm items-center gap-1.5">
+                <Label for="email">Course</Label>
+                <Select v-model="create.cou_id">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Course" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="1"> Web Application </SelectItem>
+                      <SelectItem value="2"> Mobile Application </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
-          <div class="flex gap-3">
-            <div class="grid w-full max-w-sm items-center gap-1.5">
-              <Label for="email">Gender</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="male"> Male </SelectItem>
-                    <SelectItem value="female"> Female </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+            <div class="flex gap-3 my-3">
+              <div class="grid w-full max-w-sm items-center gap-1.5">
+                <Label for="email">Date of Birth</Label>
+                <Popover>
+                  <PopoverTrigger as-child>
+                    <Button
+                      variant="outline"
+                      :class="
+                        cn(
+                          ' justify-start text-left font-normal',
+                          !create.dob && 'text-muted-foreground'
+                        )
+                      "
+                    >
+                      <CalendarIcon class="mr-2 h-4 w-4" />
+                      {{
+                        create.dob
+                          ? df.format(create.dob.toDate(getLocalTimeZone()))
+                          : "Pick a date"
+                      }}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent class="w-auto p-0">
+                    <Calendar v-model="create.dob" initial-focus />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div class="grid w-full max-w-sm items-center gap-1.5">
+                <Label for="email">Enrollment</Label>
+                <Popover>
+                  <PopoverTrigger as-child>
+                    <Button
+                      variant="outline"
+                      :class="
+                        cn(
+                          ' justify-start text-left font-normal',
+                          !create.enrollment && 'text-muted-foreground'
+                        )
+                      "
+                    >
+                      <CalendarIcon class="mr-2 h-4 w-4" />
+                      {{
+                        create.enrollment
+                          ? df.format(
+                              create.enrollment.toDate(getLocalTimeZone())
+                            )
+                          : "Pick a date"
+                      }}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent class="w-auto p-0">
+                    <Calendar v-model="create.enrollment" initial-focus />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
-            <div class="grid w-full max-w-sm items-center gap-1.5">
-              <Label for="email">Course</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Course" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="male"> Web Application </SelectItem>
-                    <SelectItem value="female"> Mobile Application </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+            <div class="flex gap-3 my-3">
+              <div class="grid w-full max-w-sm items-center gap-1.5">
+                <Label for="email">Phone Number</Label>
+                <Input
+                  v-model="create.phone"
+                  type="text"
+                  placeholder="Phone Number"
+                />
+              </div>
+              <div class="grid w-full max-w-sm items-center gap-1.5">
+                <Label for="email">Email</Label>
+                <Input
+                  v-model="create.email"
+                  type="email"
+                  placeholder="Email"
+                />
+              </div>
             </div>
-          </div>
-          <div class="flex gap-3">
-            <div class="grid w-full max-w-sm items-center gap-1.5">
-              <Label for="email">Date of Birth</Label>
-              <Popover>
-                <PopoverTrigger as-child>
-                  <Button
-                    variant="outline"
-                    :class="
-                      cn(
-                        ' justify-start text-left font-normal',
-                        !value && 'text-muted-foreground'
-                      )
-                    "
-                  >
-                    <CalendarIcon class="mr-2 h-4 w-4" />
-                    {{
-                      value
-                        ? df.format(value.toDate(getLocalTimeZone()))
-                        : "Pick a date"
-                    }}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent class="w-auto p-0">
-                  <Calendar v-model="value" initial-focus />
-                </PopoverContent>
-              </Popover>
+            <div class="flex gap-3 flex-col my-3">
+              <Label for="email">Address</Label>
+              <Textarea
+                v-model="create.address"
+                class="w-full"
+                placeholder="Type your address here."
+              />
             </div>
-            <div class="grid w-full max-w-sm items-center gap-1.5">
-              <Label for="email">Enrollment</Label>
-              <Popover>
-                <PopoverTrigger as-child>
-                  <Button
-                    variant="outline"
-                    :class="
-                      cn(
-                        ' justify-start text-left font-normal',
-                        !value && 'text-muted-foreground'
-                      )
-                    "
-                  >
-                    <CalendarIcon class="mr-2 h-4 w-4" />
-                    {{
-                      value
-                        ? df.format(value.toDate(getLocalTimeZone()))
-                        : "Pick a date"
-                    }}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent class="w-auto p-0">
-                  <Calendar v-model="value" initial-focus />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-          <div class="flex gap-3">
-            <div class="grid w-full max-w-sm items-center gap-1.5">
-              <Label for="email">Phone Number</Label>
-              <Input id="email" type="text" placeholder="Phone Number" />
-            </div>
-            <div class="grid w-full max-w-sm items-center gap-1.5">
-              <Label for="email">Email</Label>
-              <Input id="email" type="email" placeholder="Email" />
-            </div>
-          </div>
-          <div class="flex gap-3 flex-col">
-            <Label for="email">Address</Label>
-            <Textarea class="w-full" placeholder="Type your address here." />
-          </div>
-          <DialogFooter>
             <Button type="submit"> Save changes </Button>
-          </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </CardHeader>
@@ -287,8 +330,9 @@ onMounted(() => {
         </TableBody>
       </Table>
     </CardContent>
-    <CardFooter>
+
+    <!-- <CardFooter>
       <Pagination />
-    </CardFooter>
+    </CardFooter> -->
   </Card>
 </template>

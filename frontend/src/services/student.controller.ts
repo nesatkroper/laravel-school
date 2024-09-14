@@ -54,8 +54,8 @@ export const createData = async (uri: string, req: Student) => {
         address: req.address,
         enrollment: req.enrollment,
         cou_id: req.cou_id,
-        status: req.status,
-        isDelete: req.isDelete,
+        status: "active",
+        isDelete: false,
         photo: req.photo,
       },
     });
@@ -64,8 +64,56 @@ export const createData = async (uri: string, req: Student) => {
   }
 };
 
-// FOR DELETE ONLY RECODE
+//  FOR POST ONLY
+export const updateData = async (uri: string, req: Student, id: number) => {
+  try {
+    await axios({
+      method: "POST",
+      url: `${api}/${uri}/${id}`,
+      withCredentials: false,
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "X-HTTP-Method-Override": "PUT",
+      },
+      data: {
+        fname: req.fname,
+        lname: req.lname,
+        gender: req.gender,
+        dob: req.dob,
+        email: req.email,
+        phone: req.phone,
+        address: req.address,
+        enrollment: req.enrollment,
+        cou_id: req.cou_id,
+        status: "active",
+        isDelete: false,
+        photo: req.photo,
+      },
+    });
+  } catch (error) {
+    return error;
+  }
+};
+
+//  FOR POST ONLY
 export const deleteData = async (uri: string, id: number) => {
+  try {
+    await axios({
+      method: "POST",
+      url: `${api}/${uri}/${id}`,
+      withCredentials: false,
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "X-HTTP-Method-Override": "PATCH",
+      },
+    });
+  } catch (error) {
+    return error;
+  }
+};
+
+// FOR DELETE ONLY RECODE
+export const destroyData = async (uri: string, id: number) => {
   try {
     await axios({
       method: "delete",
