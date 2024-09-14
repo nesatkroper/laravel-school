@@ -1,0 +1,26 @@
+import { createRouter, createWebHistory } from "vue-router";
+// @ts-ignore
+import NotFound from "../views/404/NotFound.vue";
+const routes = [
+  {
+    path: "/",
+    component: () => import("../views/home/Homepage.vue"),
+  },
+  {
+    path: "/student",
+    component: () => import("../views/student/Student.vue"),
+  },
+
+  {
+    path: "/:pathMatch(.*)*",
+    component: NotFound,
+    name: "404",
+  },
+];
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: routes,
+});
+
+export default router;
