@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ref } from "vue";
+import type { Student } from "../types/Student";
 import { useApiStore } from "../stores/api";
 
 const apiStore = useApiStore();
@@ -28,6 +29,36 @@ export const getData = async (uri: string, id?: number) => {
       });
 
     return data.value;
+  } catch (error) {
+    return error;
+  }
+};
+
+//  FOR POST ONLY
+export const createData = async (uri: string, req: Student) => {
+  try {
+    await axios({
+      method: "POST",
+      url: `${api}/${uri}`,
+      withCredentials: false,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      data: {
+        fname: req.fname,
+        lname: req.lname,
+        gender: req.gender,
+        dob: req.dob,
+        email: req.email,
+        phone: req.phone,
+        address: req.address,
+        enrollment: req.enrollment,
+        cou_id: req.cou_id,
+        status: req.status,
+        isDelete: req.isDelete,
+        photo: req.photo,
+      },
+    });
   } catch (error) {
     return error;
   }

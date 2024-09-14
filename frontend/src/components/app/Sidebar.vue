@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fixed mt-16 flex flex-col h-screen w-64 bg-white text-black shadow-xl lg:flex space-x-4"
+    class="fixed mt-16 hidden flex-col h-screen w-64 bg-white text-black shadow-xl xl:flex space-x-4"
   >
     <!-- Logo Section -->
     <div

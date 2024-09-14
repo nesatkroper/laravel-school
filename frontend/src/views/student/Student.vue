@@ -2,9 +2,11 @@
 import { ref, onMounted } from "vue";
 // import axios from "axios";
 import type { Student } from "../../types/Student";
-import { getData, deleteData } from "../../services/method";
+import { getData, deleteData, createData } from "../../services/method";
 
 // COMPONENT
+// @ts-ignore
+import Pagination from "./Pagination.vue";
 import {
   Card,
   CardContent,
@@ -36,15 +38,32 @@ import { Input } from "../../components/ui/input";
 import { Search } from "lucide-vue-next";
 import { Label } from "../../components/ui/label";
 import {
-  Pagination,
-  PaginationEllipsis,
-  PaginationFirst,
-  PaginationLast,
-  PaginationList,
-  PaginationListItem,
-  PaginationNext,
-  PaginationPrev,
-} from "../../components/ui/pagination";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+import { Textarea } from "../../components/ui/textarea";
+import {
+  DateFormatter,
+  type DateValue,
+  getLocalTimeZone,
+} from "@internationalized/date";
+import { Calendar as CalendarIcon } from "lucide-vue-next";
+import { Calendar } from "../..//components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../../components/ui/popover";
+import { cn } from "../../lib/utils";
+
+const df = new DateFormatter("en-US", {
+  dateStyle: "long",
+});
+
+const value = ref<DateValue>();
 
 // FIELDS
 const student: any = ref<Student[]>([]);
@@ -95,19 +114,117 @@ onMounted(() => {
             </span>
           </div>
         </div>
-        <DialogContent class="sm:max-w-[425px]">
+        <DialogContent class="sm:max-w-[575px]">
           <DialogHeader>
             <DialogTitle>Add Student</DialogTitle>
           </DialogHeader>
           <div class="flex gap-3">
             <div class="grid w-full max-w-sm items-center gap-1.5">
-              <Label for="email">Email</Label>
-              <Input id="email" type="email" placeholder="Email" />
+              <Label for="email">First Name</Label>
+              <Input id="email" type="text" placeholder="First Name" />
+            </div>
+            <div class="grid w-full max-w-sm items-center gap-1.5">
+              <Label for="email">Last Name</Label>
+              <Input id="email" type="text" placeholder="Last Name" />
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <div class="grid w-full max-w-sm items-center gap-1.5">
+              <Label for="email">Gender</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="male"> Male </SelectItem>
+                    <SelectItem value="female"> Female </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div class="grid w-full max-w-sm items-center gap-1.5">
+              <Label for="email">Course</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Course" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="male"> Web Application </SelectItem>
+                    <SelectItem value="female"> Mobile Application </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <div class="grid w-full max-w-sm items-center gap-1.5">
+              <Label for="email">Date of Birth</Label>
+              <Popover>
+                <PopoverTrigger as-child>
+                  <Button
+                    variant="outline"
+                    :class="
+                      cn(
+                        ' justify-start text-left font-normal',
+                        !value && 'text-muted-foreground'
+                      )
+                    "
+                  >
+                    <CalendarIcon class="mr-2 h-4 w-4" />
+                    {{
+                      value
+                        ? df.format(value.toDate(getLocalTimeZone()))
+                        : "Pick a date"
+                    }}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent class="w-auto p-0">
+                  <Calendar v-model="value" initial-focus />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div class="grid w-full max-w-sm items-center gap-1.5">
+              <Label for="email">Enrollment</Label>
+              <Popover>
+                <PopoverTrigger as-child>
+                  <Button
+                    variant="outline"
+                    :class="
+                      cn(
+                        ' justify-start text-left font-normal',
+                        !value && 'text-muted-foreground'
+                      )
+                    "
+                  >
+                    <CalendarIcon class="mr-2 h-4 w-4" />
+                    {{
+                      value
+                        ? df.format(value.toDate(getLocalTimeZone()))
+                        : "Pick a date"
+                    }}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent class="w-auto p-0">
+                  <Calendar v-model="value" initial-focus />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <div class="grid w-full max-w-sm items-center gap-1.5">
+              <Label for="email">Phone Number</Label>
+              <Input id="email" type="text" placeholder="Phone Number" />
             </div>
             <div class="grid w-full max-w-sm items-center gap-1.5">
               <Label for="email">Email</Label>
               <Input id="email" type="email" placeholder="Email" />
             </div>
+          </div>
+          <div class="flex gap-3 flex-col">
+            <Label for="email">Address</Label>
+            <Textarea class="w-full" placeholder="Type your address here." />
           </div>
           <DialogFooter>
             <Button type="submit"> Save changes </Button>
@@ -131,7 +248,7 @@ onMounted(() => {
           </TableRow>
         </TableBody>
       </Table>
-      <Table v-else>
+      <Table v-else class="">
         <TableCaption>A list of your student.</TableCaption>
         <TableHeader>
           <TableRow>
@@ -171,38 +288,7 @@ onMounted(() => {
       </Table>
     </CardContent>
     <CardFooter>
-      <Pagination
-        v-slot="{ page }"
-        :total="100"
-        :sibling-count="1"
-        show-edges
-        :default-page="2"
-      >
-        <PaginationList v-slot="{ items }" class="flex items-center gap-1">
-          <PaginationFirst />
-          <PaginationPrev />
-
-          <template v-for="(item, index) in items">
-            <PaginationListItem
-              v-if="item.type === 'page'"
-              :key="index"
-              :value="item.value"
-              as-child
-            >
-              <Button
-                class="w-10 h-10 p-0"
-                :variant="item.value === page ? 'default' : 'outline'"
-              >
-                {{ item.value }}
-              </Button>
-            </PaginationListItem>
-            <PaginationEllipsis v-else :key="item.type" :index="index" />
-          </template>
-
-          <PaginationNext />
-          <PaginationLast />
-        </PaginationList>
-      </Pagination>
+      <Pagination />
     </CardFooter>
   </Card>
 </template>

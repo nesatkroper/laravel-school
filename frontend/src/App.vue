@@ -12,7 +12,7 @@ import Sidebar from "./components/app/Sidebar.vue";
     <Header />
     <div class="flex flex-col">
       <Sidebar />
-      <div class="my-16 lg:ms-64 ms-0">
+      <div class="my-16 xl:ms-64 ms-0">
         <router-view />
       </div>
     </div>
